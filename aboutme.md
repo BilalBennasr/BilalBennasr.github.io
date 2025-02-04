@@ -1,13 +1,13 @@
 ---
 layout: page
 title: About me
-subtitle: Why you'd want to go on a date with me
+subtitle: Why you'd want me to join your company
 ---
 
-My name is Inigo Montoya. I have the following qualities:
+My name is Bilal Ben nasr. I have the following qualities:
 
-- I rock a great mustache
-- I'm extremely loyal to my family
+- I am vey humble
+- I'm extremely good at what i do
 
 What else do you need?
 
