@@ -6,7 +6,7 @@ document.getElementById('send-btn').addEventListener('click', async () => {
     chatLog.innerHTML += `<p><strong>Vous:</strong> ${userInput}</p>`;
     
     // Envoyer le message à ton backend (voir étape 2)
-    const response = await fetch('https://ton-backend.com/api/chat', {  // Remplace par l'URL de ton endpoint
+    const response = await fetch('https://sb-server-bilalbennasrs-projects.vercel.app/', {  // Remplace par l'URL de ton endpoint
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: userInput })
