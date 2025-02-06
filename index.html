@@ -4,9 +4,52 @@ title: Bilal Ben nasr
 subtitle: AI and Applied Mathematics student, actively seeking an internship.
 ---
 
-<div id="chat">
-    <div id="chat-log" style="border:1px solid #ccc; padding:10px; height:300px; overflow:auto;"></div>
-    <input type="text" id="user-input" placeholder="Votre message..." style="width:80%;">
-    <button id="send-btn">Envoyer</button>
+<div id="chat-container" style="max-width:600px; margin:auto;">
+    <div id="chat-log" style="border:1px solid #ccc; padding:10px; height:400px; overflow-y:auto;"></div>
+    <div style="display:flex; margin-top:10px;">
+      <input type="text" id="chat-input" placeholder="Tapez votre message..." style="flex:1; padding:10px;">
+      <button id="chat-send" style="padding:10px;">Envoyer</button>
+    </div>
   </div>
+<script>
+
+document.getElementById('chat-send').addEventListener('click', sendMessage);
+document.getElementById('chat-input').addEventListener('keyup', function(e) {
+  if (e.key === 'Enter') sendMessage();
+});
+
+async function sendMessage() {
+  const inputField = document.getElementById('chat-input');
+  const chatLog = document.getElementById('chat-log');
+  const message = inputField.value.trim();
+  if (!message) return;
+
+  // Afficher le message de l'utilisateur
+  appendMessage('Vous', message);
+  inputField.value = '';
+
+  try {
+    const response = await fetch('https://ton-projet.vercel.app/api/chat', { // Remplace par ton URL Vercel
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await response.json();
+    // Afficher la réponse de l'IA
+    appendMessage('IA', data.response);
+  } catch (error) {
+    console.error(error);
+    appendMessage('Système', 'Une erreur est survenue, réessayez plus tard.');
+  }
+}
+
+function appendMessage(sender, text) {
+  const chatLog = document.getElementById('chat-log');
+  const messageElem = document.createElement('p');
+  messageElem.innerHTML = `<strong>${sender} :</strong> ${text}`;
+  chatLog.appendChild(messageElem);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+</script>  
   
