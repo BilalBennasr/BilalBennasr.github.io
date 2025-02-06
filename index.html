@@ -29,7 +29,7 @@ async function sendMessage() {
   inputField.value = '';
 
   try {
-    const response = await fetch('https://ton-projet.vercel.app/api/chat', { // Remplace par ton URL Vercel
+    const response = await fetch('https://sb-server.vercel.app/api/chat', { // Remplace par ton URL Vercel
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message })
