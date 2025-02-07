@@ -41,28 +41,57 @@ layout: default
 document.getElementById('chat-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const input = document.getElementById('user-input');
-  const messagesDiv = document.getElementById('messages');
+  const btn = document.getElementById('submit-btn');
+  const loading = document.getElementById('loading');
+  
+  // Désactiver le bouton pendant la requête
+  btn.disabled = true;
+  loading.classList.add('visible');
+
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
 
   // Ajouter le message utilisateur
-  messagesDiv.innerHTML += `<div class="user">Vous: ${input.value}</div>`;
+  addMessage(userMessage, 'user');
+  input.value = '';
 
   try {
     const response = await fetch('https://mon-projet-next-one.vercel.app/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [{ role: 'user', content: input.value }]
+        messages: [{ role: 'user', content: userMessage }]
       }),
     });
 
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    
     const data = await response.json();
-    messagesDiv.innerHTML += `<div class="bot">IA: ${data.reply}</div>`;
+    addMessage(data.reply, 'bot');
 
   } catch (error) {
-    console.error('Erreur:', error);
-    messagesDiv.innerHTML += `<div class="error">Erreur de connexion</div>`;
+    addMessage(`Erreur : ${error.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('visible');
   }
-
-  input.value = '';
 });
+
+function addMessage(content, type = 'bot') {
+  const messagesDiv = document.getElementById('messages');
+  const timestamp = new Date().toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
+  const messageEl = document.createElement('div');
+  messageEl.className = `message ${type}-message`;
+  messageEl.innerHTML = `
+    <div class="message-content">${content}</div>
+    ${type !== 'error' ? `<span class="timestamp">${timestamp}</span>` : ''}
+  `;
+
+  messagesDiv.appendChild(messageEl);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight; // Défilement automatique
+}
 </script>
