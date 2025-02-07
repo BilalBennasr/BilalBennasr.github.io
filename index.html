@@ -38,10 +38,10 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
     messagesDiv.innerHTML += `<div class="bot">IA: ${data.reply}</div>`;
 
   } catch (error) {
+    console.error('Erreur:', error);
     messagesDiv.innerHTML += `<div class="error">Erreur de connexion</div>`;
   }
 
   input.value = '';
 });
 </script>
-  
