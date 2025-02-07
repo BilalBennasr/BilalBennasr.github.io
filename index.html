@@ -37,7 +37,61 @@ layout: default
   </form>
 </div>
 
+
 <script>
+  document.getElementById('chat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('user-input');
+  const messagesDiv = document.getElementById('messages');
+  
+  // Ajouter le message utilisateur
+  const userMessage = input.value.trim();
+  messagesDiv.innerHTML += `
+    <div class="message user-message">
+      <div class="message-content">${userMessage}</div>
+    </div>
+  `;
+  
+  // Créer un élément vide pour la réponse de l'IA
+  const botMessageDiv = document.createElement('div');
+  botMessageDiv.className = 'message bot-message';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  botMessageDiv.appendChild(contentDiv);
+  messagesDiv.appendChild(botMessageDiv);
+
+  try {
+    const eventSource = new EventSource(`https://mon-projet-next-one.vercel.app/api/stream-chat?messages=${encodeURIComponent(JSON.stringify([{ role: 'user', content: userMessage }]))}`);
+
+    contentDiv.innerHTML = '▌'; // Curseur de saisie animé
+
+    eventSource.onmessage = (event) => {
+      if (event.data === '[DONE]') {
+        eventSource.close();
+        return;
+      }
+
+      const { content, error } = JSON.parse(event.data);
+      if (error) throw new Error(error);
+      
+      contentDiv.innerHTML = content.replace(/▌$/, '') + '▌';
+    };
+
+    eventSource.onerror = () => {
+      contentDiv.innerHTML = contentDiv.innerHTML.replace(/▌$/, '');
+      eventSource.close();
+      throw new Error('Erreur de connexion');
+    };
+
+  } catch (error) {
+    contentDiv.innerHTML += `<div class="error">${error.message}</div>`;
+  }
+
+  input.value = '';
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+</script>
+<!-- <script>
 document.getElementById('chat-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const input = document.getElementById('user-input');
@@ -94,4 +148,4 @@ function addMessage(content, type = 'bot') {
   messagesDiv.appendChild(messageEl);
   messagesDiv.scrollTop = messagesDiv.scrollHeight; // Défilement automatique
 }
-</script>
+</script> -->
