@@ -8,11 +8,32 @@ subtitle: AI and Applied Mathematics student, actively seeking an internship.
 layout: default
 ---
 
-<div id="chat">
-  <div id="messages"></div>
-  <form id="chat-form">
-    <input type="text" id="user-input" placeholder="Votre message...">
-    <button type="submit">Envoyer</button>
+<div class="chat-container">
+  <div class="messages-wrapper" id="messages">
+    <div class="loading-indicator" id="loading">IA réfléchit...</div>
+    
+    <!-- Exemple de message -->
+    <div class="message user-message">
+      <div class="message-content">Bonjour !</div>
+      <span class="timestamp">10:00</span>
+    </div>
+    
+    <div class="message bot-message">
+      <div class="message-content">Bonjour ! Comment puis-je vous aider ?</div>
+      <span class="timestamp">10:01</span>
+    </div>
+  </div>
+
+  <form class="chat-form" id="chat-form">
+    <input 
+      type="text" 
+      id="user-input" 
+      placeholder="Écrivez votre message..."
+      autocomplete="off"
+    >
+    <button type="submit" id="submit-btn">
+      Envoyer → 
+    </button>
   </form>
 </div>
 

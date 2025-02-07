@@ -1,0 +1,129 @@
+
+.chat-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.messages-wrapper {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 60vh;
+  overflow-y: auto;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
+}
+
+.message {
+  margin: 0.8rem 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  max-width: 75%;
+  position: relative;
+  animation: fadeIn 0.3s ease-in;
+
+  &.user-message {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+  }
+
+  &.bot-message {
+    background: #ffffff;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom-left-radius: 4px;
+  }
+
+
+  .message-content {
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+
+  .timestamp {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+}
+
+
+.chat-form {
+  display: flex;
+  gap: 0.5rem;
+
+  input {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    }
+  }
+
+  button {
+    padding: 1rem 2rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: 600;
+
+    &:hover {
+      background: #0056b3;
+    }
+
+    &:disabled {
+      background: #e9ecef;
+      cursor: not-allowed;
+    }
+  }
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.loading-indicator {
+  display: none;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 1rem;
+
+  &.visible {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+      margin: 1rem;
+      padding: 0;
+    }
+  
+    .messages-wrapper {
+      height: 50vh;
+    }
+  
+    .message {
+      max-width: 85%;
+    }
+  }
