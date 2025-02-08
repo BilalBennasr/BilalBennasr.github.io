@@ -7,99 +7,204 @@ subtitle: AI and Applied Mathematics student, actively seeking an internship.
 ---
 layout: default
 ---
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Chat IA en Streaming</title>
   <style>
-    /* Styles simples pour le chat */
+    .chat-container {
+      max-width: 800px;
+      margin: 20px auto;
+      font-family: Arial, sans-serif;
+    }
+
     #chatOutput {
       border: 1px solid #ccc;
-      padding: 10px;
-      height: 300px;
+      border-radius: 8px;
+      padding: 20px;
+      height: 400px;
       overflow-y: auto;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      background: #f9f9f9;
     }
+
+    .input-container {
+      display: flex;
+      gap: 10px;
+    }
+
     #userInput {
-      width: 70%;
-      padding: 8px;
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
     }
+
     #sendBtn {
-      padding: 8px 16px;
+      padding: 12px 24px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #sendBtn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .user-message {
+      background: #007bff;
+      color: white;
+      margin-left: 20%;
+    }
+
+    .ai-message {
+      background: white;
+      color: black;
+      margin-right: 20%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .error-message {
+      background: #dc3545;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .loading {
+      display: inline-block;
+      margin-left: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="chatOutput"></div>
-  <input type="text" id="userInput" placeholder="Tapez votre message...">
-  <button id="sendBtn">Envoyer</button>
+  <div class="chat-container">
+    <div id="chatOutput"></div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Tapez votre message...">
+      <button id="sendBtn">Envoyer</button>
+    </div>
+  </div>
 
   <script>
-    // Remplace 'YOUR_API_KEY' par ta clé OpenAI
-    const API_KEY = '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';
     const chatOutput = document.getElementById('chatOutput');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    let isProcessing = false;
+
+    function appendMessage(content, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+      messageDiv.textContent = content;
+      chatOutput.appendChild(messageDiv);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+      return messageDiv;
+    }
+
+    function showError(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.textContent = message;
+      chatOutput.appendChild(errorDiv);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+    }
 
     async function sendMessage(message) {
-      // Affiche le message utilisateur
-      chatOutput.innerHTML += `<div><strong>Vous :</strong> ${message}</div>`;
-      chatOutput.innerHTML += `<div><strong>IA :</strong> `;
+      if (isProcessing) return;
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + API_KEY
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: message }],
-          stream: true
-        })
-      });
+      isProcessing = true;
+      sendBtn.disabled = true;
+      userInput.disabled = true;
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        const chunk = decoder.decode(value);
-        chunk.split("\n").forEach(line => {
-          if (line.startsWith("data: ")) {
-            const dataStr = line.replace("data: ", "").trim();
-            if (dataStr === "[DONE]") return;
-            try {
-              const data = JSON.parse(dataStr);
-              const token = data.choices[0].delta.content;
-              if (token) {
-                chatOutput.innerHTML += token;
+      try {
+        appendMessage(message, true);
+        const aiMessage = appendMessage('');
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: message }]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim());
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                const token = parsed.choices[0]?.delta?.content || '';
+                fullResponse += token;
+                aiMessage.textContent = fullResponse;
                 chatOutput.scrollTop = chatOutput.scrollHeight;
+              } catch (e) {
+                console.error('Erreur de parsing:', e);
               }
-            } catch (e) {
-              console.error("Erreur lors du parsing :", e, line);
             }
           }
-        });
+        }
+
+      } catch (error) {
+        console.error('Erreur:', error);
+        showError('Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+      } finally {
+        isProcessing = false;
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+        userInput.focus();
       }
-      chatOutput.innerHTML += `</div>`;
     }
 
     sendBtn.addEventListener('click', () => {
-      const message = userInput.value;
-      if (message.trim()) {
-        sendMessage(message.trim());
-        userInput.value = "";
+      const message = userInput.value.trim();
+      if (message) {
+        sendMessage(message);
+        userInput.value = '';
       }
     });
 
-    userInput.addEventListener('keyup', (event) => {
-      if (event.key === "Enter") {
+    userInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
         sendBtn.click();
       }
     });
+
+    // Focus initial sur l'input
+    userInput.focus();
   </script>
 </body>
 </html>
