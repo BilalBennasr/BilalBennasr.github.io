@@ -7,151 +7,99 @@ subtitle: AI and Applied Mathematics student, actively seeking an internship.
 ---
 layout: default
 ---
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const chat = new OpenAIChat('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');
-  });
-</script>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat IA en Streaming</title>
+  <style>
+    /* Styles simples pour le chat */
+    #chatOutput {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    #userInput {
+      width: 70%;
+      padding: 8px;
+    }
+    #sendBtn {
+      padding: 8px 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chatOutput"></div>
+  <input type="text" id="userInput" placeholder="Tapez votre message...">
+  <button id="sendBtn">Envoyer</button>
 
+  <script>
+    // Remplace 'YOUR_API_KEY' par ta clé OpenAI
+    const API_KEY = 'YOUR_API_KEY';
+    const chatOutput = document.getElementById('chatOutput');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-<!-- <div class="chat-container">
-  <div class="messages-wrapper" id="messages">
-    <div class="loading-indicator" id="loading">IA réfléchit...</div>
-    
-    <!-- Exemple de message -->
-    <div class="message user-message">
-      <div class="message-content">Bonjour !</div>
-      <span class="timestamp">10:00</span>
-    </div>
-    
-    <div class="message bot-message">
-      <div class="message-content">Bonjour ! Comment puis-je vous aider ?</div>
-      <span class="timestamp">10:01</span>
-    </div>
-  </div>
-
-  <form class="chat-form" id="chat-form">
-    <input 
-      type="text" 
-      id="user-input" 
-      placeholder="Écrivez votre message..."
-      autocomplete="off"
-    >
-    <button type="submit" id="submit-btn">
-      Envoyer → 
-    </button>
-  </form>
-</div>
-
-
-<script>
-  document.getElementById('chat-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = document.getElementById('user-input');
-  const messagesDiv = document.getElementById('messages');
-  
-  // Ajouter le message utilisateur
-  const userMessage = input.value.trim();
-  messagesDiv.innerHTML += `
-    <div class="message user-message">
-      <div class="message-content">${userMessage}</div>
-    </div>
-  `;
-  
-  // Créer un élément vide pour la réponse de l'IA
-  const botMessageDiv = document.createElement('div');
-  botMessageDiv.className = 'message bot-message';
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content';
-  botMessageDiv.appendChild(contentDiv);
-  messagesDiv.appendChild(botMessageDiv);
-
-  try {
-    const eventSource = new EventSource(`https://mon-projet-next-one.vercel.app/api/stream-chat?messages=${encodeURIComponent(JSON.stringify([{ role: 'user', content: userMessage }]))}`);
-
-    contentDiv.innerHTML = '▌'; // Curseur de saisie animé
-
-    eventSource.onmessage = (event) => {
-      if (event.data === '[DONE]') {
-        eventSource.close();
-        return;
-      }
-
-      const { content, error } = JSON.parse(event.data);
-      if (error) throw new Error(error);
+    async function sendMessage(message) {
+      // Affiche le message utilisateur
+      chatOutput.innerHTML += `<div><strong>Vous :</strong> ${message}</div>`;
+      chatOutput.innerHTML += `<div><strong>IA :</strong> `;
       
-      contentDiv.innerHTML = content.replace(/▌$/, '') + '▌';
-    };
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + API_KEY
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }],
+          stream: true
+        })
+      });
 
-    eventSource.onerror = () => {
-      contentDiv.innerHTML = contentDiv.innerHTML.replace(/▌$/, '');
-      eventSource.close();
-      throw new Error('Erreur de connexion');
-    };
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunk = decoder.decode(value);
+        chunk.split("\n").forEach(line => {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "").trim();
+            if (dataStr === "[DONE]") return;
+            try {
+              const data = JSON.parse(dataStr);
+              const token = data.choices[0].delta.content;
+              if (token) {
+                chatOutput.innerHTML += token;
+                chatOutput.scrollTop = chatOutput.scrollHeight;
+              }
+            } catch (e) {
+              console.error("Erreur lors du parsing :", e, line);
+            }
+          }
+        });
+      }
+      chatOutput.innerHTML += `</div>`;
+    }
 
-  } catch (error) {
-    contentDiv.innerHTML += `<div class="error">${error.message}</div>`;
-  }
-
-  input.value = '';
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-});
-</script> -->
-<!-- <script>
-document.getElementById('chat-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = document.getElementById('user-input');
-  const btn = document.getElementById('submit-btn');
-  const loading = document.getElementById('loading');
-  
-  // Désactiver le bouton pendant la requête
-  btn.disabled = true;
-  loading.classList.add('visible');
-
-  const userMessage = input.value.trim();
-  if (!userMessage) return;
-
-  // Ajouter le message utilisateur
-  addMessage(userMessage, 'user');
-  input.value = '';
-
-  try {
-    const response = await fetch('https://mon-projet-next-one.vercel.app/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: userMessage }]
-      }),
+    sendBtn.addEventListener('click', () => {
+      const message = userInput.value;
+      if (message.trim()) {
+        sendMessage(message.trim());
+        userInput.value = "";
+      }
     });
 
-    if (!response.ok) throw new Error(`Erreur ${response.status}`);
-    
-    const data = await response.json();
-    addMessage(data.reply, 'bot');
-
-  } catch (error) {
-    addMessage(`Erreur : ${error.message}`, 'error');
-  } finally {
-    btn.disabled = false;
-    loading.classList.remove('visible');
-  }
-});
-
-function addMessage(content, type = 'bot') {
-  const messagesDiv = document.getElementById('messages');
-  const timestamp = new Date().toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-
-  const messageEl = document.createElement('div');
-  messageEl.className = `message ${type}-message`;
-  messageEl.innerHTML = `
-    <div class="message-content">${content}</div>
-    ${type !== 'error' ? `<span class="timestamp">${timestamp}</span>` : ''}
-  `;
-
-  messagesDiv.appendChild(messageEl);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight; // Défilement automatique
-}
-</script> -->
+    userInput.addEventListener('keyup', (event) => {
+      if (event.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
