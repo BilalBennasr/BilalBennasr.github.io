@@ -34,12 +34,11 @@ async function sendMessage() {
   isStreaming = true;
   
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `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`
-      },
+        'Content-Type': 'application/json'
+        },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: message }],
