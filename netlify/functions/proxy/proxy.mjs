@@ -1,20 +1,24 @@
-exports.handler = async (event) => {
-  const params = JSON.parse(event.body);
-  
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      ...params,
-      stream: true
-    })
-  });
+const axios = require('axios');
 
-  return {
-    statusCode: 200,
-    body: await response.text()
-  };
+exports.handler = async (event) => {
+  try {
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', 
+      JSON.parse(event.body), 
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(response.data)
+    };
+  } catch (error) {
+    return {
+      statusCode: error.response?.status || 500,
+      body: JSON.stringify(error.response?.data || 'Error')
+    };
+  }
 };
