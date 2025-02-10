@@ -44,7 +44,7 @@ async function sendMessage() {
         messages: [{ role: "user", content: message }],
         stream: true
       })
-    });
+    }); 
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
