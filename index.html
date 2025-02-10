@@ -34,7 +34,7 @@ async function sendMessage() {
   isStreaming = true;
   
   try {
-    const response = await fetch('/.netlify/functions/openai-proxy', {
+    const response = await fetch('/.netlify/functions/proxy/proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
