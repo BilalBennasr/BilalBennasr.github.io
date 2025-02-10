@@ -14,7 +14,7 @@ async function sendMessage() {
   isStreaming = true;
   
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
