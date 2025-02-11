@@ -1,7 +1,7 @@
 const axios = require('axios');
-const { TextDecoder } = require('util');
 
 exports.handler = async (event, context) => {
+  // Gérer les requêtes OPTIONS pour CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -14,6 +14,7 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Gérer les requêtes POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -28,55 +29,21 @@ exports.handler = async (event, context) => {
 
   try {
     const body = JSON.parse(event.body);
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      return {
-        statusCode: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io',
-          'Access-Control-Allow-Methods': 'POST,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-        body: JSON.stringify({ error: 'No API Key has been set!' }),
-      };
-    }
 
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: body.model || "gpt-4o-mini",
+        model: "gpt-4o-mini",
         messages: body.messages,
-        max_tokens: body.maxTokens || 150,
-        temperature: body.temperature || 1,
-        top_p: body.topP || 1,
-        n: body.n || 1,
-        stop: body.stop || null,
-        presence_penalty: body.presencePenalty || 0,
-        frequency_penalty: body.frequencyPenalty || 0,
-        logit_bias: body.logitBias || {},
-        user: body.user || '',
-        stream: true,
+        stream: false
       },
       {
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        responseType: 'stream',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
       }
     );
-
-    const decoder = new TextDecoder("utf-8");
-    let responseText = '';
-
-    for await (const chunk of response.data) {
-      const decodedChunk = decoder.decode(chunk);
-      responseText += decodedChunk;
-      // Envoyer des morceaux de données à intervalles réguliers
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simuler un délai
-    }
 
     return {
       statusCode: 200,
@@ -86,9 +53,8 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Methods': 'POST,OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
-      body: JSON.stringify({ response: responseText }),
+      body: JSON.stringify(response.data)
     };
-
   } catch (error) {
     console.error('Error:', error);
     return {
@@ -99,7 +65,10 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Methods': 'POST,OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
-      body: JSON.stringify({ error: error.message || 'Internal Server Error' }),
+      body: JSON.stringify({
+        error: error.response?.data || 'Internal Server Error'
+      })
     };
   }
 };
+
