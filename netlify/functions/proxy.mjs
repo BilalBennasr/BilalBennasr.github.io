@@ -1,5 +1,21 @@
 const axios = require('axios');
 
+exports.handler = async (event, context) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+      body: '',
+    };
+  }
+
+  // Le reste de votre code pour gérer les requêtes POST
+};
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
