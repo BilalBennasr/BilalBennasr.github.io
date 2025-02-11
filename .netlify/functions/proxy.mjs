@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: "gpt-4-turbo-preview", // "gpt-4o-mini" n'existe pas
+        model: "gpt-4o-mini", // "gpt-4o-mini" n'existe pas
         messages: body.messages,
         stream: false // Le streaming nécessite une gestion différente
       },
