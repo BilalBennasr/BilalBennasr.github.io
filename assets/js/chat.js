@@ -1,4 +1,4 @@
-async function callOpenAI(message) {
+async function sendMessage(message) {
   try {
     const response = await fetch('/.netlify/functions/proxy', {
       method: 'POST',
@@ -10,12 +10,8 @@ async function callOpenAI(message) {
       })
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
     const data = await response.json();
-    return data;
+    return data.choices[0].message.content;
   } catch (error) {
     console.error('Error:', error);
     throw error;
