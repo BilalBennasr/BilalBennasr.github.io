@@ -34,7 +34,7 @@ async function sendMessage() {
   isStreaming = true;
   
   try {
-    const response = await fetch('/.netlify/functions/proxy/proxy', {
+    const response = await fetch('https://joyful-clafoutis-2e1cd6.netlify.app/.netlify/functions/proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
