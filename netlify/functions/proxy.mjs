@@ -16,7 +16,7 @@ exports.handler = async (event) => {
       {
         model: "gpt-4o-mini",
         messages: body.messages,
-        stream: false
+        stream: true
       },
       {
         headers: {
