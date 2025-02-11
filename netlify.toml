@@ -1,4 +1,4 @@
 [build]
-  functions = "functions"
+  functions = "netlify/functions"  # Changement ici
   command = "gem update --system && bundle install && jekyll build"
   publish = "_site"
