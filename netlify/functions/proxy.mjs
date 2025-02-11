@@ -43,5 +43,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-proxy.mjs
