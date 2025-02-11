@@ -29,7 +29,10 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io', // Remplacez par votre domaine GitHub Pages
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
       body: JSON.stringify(response.data)
     };
