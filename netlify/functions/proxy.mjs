@@ -1,6 +1,7 @@
 const axios = require('axios');
 
 exports.handler = async (event, context) => {
+  // Gérer les requêtes OPTIONS pour CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
@@ -13,20 +14,22 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Le reste de votre code pour gérer les requêtes POST
-};
-
-exports.handler = async (event) => {
+  // Gérer les requêtes POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      body: 'Method Not Allowed'
+      headers: {
+        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+      body: 'Method Not Allowed',
     };
   }
 
   try {
     const body = JSON.parse(event.body);
-    
+
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -46,7 +49,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io', // Remplacez par votre domaine GitHub Pages
+        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io',
         'Access-Control-Allow-Methods': 'POST,OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
@@ -56,9 +59,16 @@ exports.handler = async (event) => {
     console.error('Error:', error);
     return {
       statusCode: error.response?.status || 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://bilalbennasr.github.io',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
       body: JSON.stringify({
         error: error.response?.data || 'Internal Server Error'
       })
     };
   }
 };
+
